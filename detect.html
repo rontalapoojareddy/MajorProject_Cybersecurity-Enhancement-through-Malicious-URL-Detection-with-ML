@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>URLGuardian - Detect URLs</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.css" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body class="text-white bg-dark">
+    <nav class="navbar navbar-expand-lg navbar-light bg-dark fixed-top shadow-sm">
+        <div class="container">
+            <a class="navbar-brand d-flex align-items-center" href="/">
+                <i class="bi bi-shield-check text-primary me-2" style="font-size: 1.5rem;"></i>
+                <span class="fw-bold">URLGuardian</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/">
+                            <i class="bi bi-house-door me-1"></i> Home
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="/detect">
+                            <i class="bi bi-search-heart me-1"></i> Detect URL
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/about">
+                            <i class="bi bi-info-circle me-1"></i> About
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-outline-primary mx-2" href="/signin">
+                            <i class="bi bi-box-arrow-in-right me-1"></i> Sign In
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link btn btn-primary text-white" href="/register">
+                            <i class="bi bi-person-plus me-1"></i> Register
+                        </a>
+                    </li>
+                    <li class="nav-item d-none" id="userProfileNav">
+                        <a class="nav-link btn btn-outline-danger" href="#" id="logoutBtn">
+                            <i class="bi bi-box-arrow-right me-1"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <header class="detect-section text-center">
+        <div class="container">
+            <h1 class="display-4 fw-bold text-white" data-aos="fade-up">Detect Malicious URLs</h1>
+            <p class="lead text-white" data-aos="fade-up" data-aos-delay="200">Enter any suspicious URL and our advanced analysis will check it for potential threats</p>
+        </div>
+    </header>
+
+    <main class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <div class="card bg-dark text-white">
+                    <div class="card-body">
+                        <h2 class="card-title text-center">Analyze URL</h2>
+                        <form id="urlForm">
+                            <div class="mb-3">
+                                <label for="urlInput" class="form-label">Enter URL</label>
+                                <input type="url" class="form-control" id="urlInput" placeholder="https://example.com" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary w-100">Analyze</button>
+                        </form>
+                        <div id="result" class="mt-4"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer py-5 mt-5 bg-dark text-white">
+        <div class="container text-center">
+            <div class="footer-brand mb-4">
+                <i class="bi bi-shield-check text-primary" style="font-size: 2rem;"></i>
+                <h4 class="d-inline-block align-middle ms-2">URLGuardian</h4>
+            </div>
+            <p class="text-muted mb-4">Protecting users from malicious URLs through advanced machine learning and real-time threat detection.</p>
+            
+            <div class="social-links">
+                <a href="#" class="social-link mx-2"><i class="bi bi-github"></i></a>
+                <a href="#" class="social-link mx-2"><i class="bi bi-twitter"></i></a>
+                <a href="#" class="social-link mx-2"><i class="bi bi-linkedin"></i></a>
+            </div>
+            
+            <hr class="my-4">
+            <p class="text-muted">&copy; 2025 URLGuardian. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"></script>
+    <script>
+        // Ensure AOS is defined before initializing
+        document.addEventListener('DOMContentLoaded', function() {
+            const aosScript = document.querySelector('script[src="https://cdn.jsdelivr.net/npm/aos@2.3.4/dist/aos.js"]');
+            if (aosScript) {
+                aosScript.onload = function() {
+                    if (typeof AOS !== 'undefined') {
+                        console.log('AOS library loaded successfully.');
+                        AOS.init({
+                            duration: 800,
+                            once: true,
+                        });
+                    } else {
+                        console.error('AOS library is not loaded.');
+                    }
+                };
+            } else {
+                console.error('AOS script tag is missing.');
+            }
+        });
+
+        // Check authentication status
+        function checkAuth() {
+            const user = JSON.parse(localStorage.getItem('user'));
+            const userProfileNav = document.getElementById('userProfileNav');
+            const loginNav = document.querySelector('a[href="/signin"]').parentElement;
+            const registerNav = document.querySelector('a[href="/register"]').parentElement;
+
+            if (user) {
+                userProfileNav.classList.remove('d-none');
+                loginNav.classList.add('d-none');
+                registerNav.classList.add('d-none');
+            } else {
+                userProfileNav.classList.add('d-none');
+                loginNav.classList.remove('d-none');
+                registerNav.classList.remove('d-none');
+            }
+        }
+
+        // Handle logout
+        document.getElementById('logoutBtn').addEventListener('click', async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/api/logout', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+
+                if (response.ok) {
+                    localStorage.removeItem('user');
+                    window.location.href = '/';
+                }
+            } catch (error) {
+                console.error('Logout error:', error);
+            }
+        });
+
+        // URL Detection Form
+        document.getElementById('urlForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const urlInput = document.getElementById('urlInput').value;
+            const resultDiv = document.getElementById('result');
+
+            try {
+                const response = await fetch('/api/analyze-url', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ url: urlInput })
+                });
+
+                const data = await response.json();
+                console.log('Response data:', data);
+
+                if (response.ok) {
+                    const isMalicious = data.is_malicious ? 'Malicious' : 'Safe';
+                    const riskScore = data.risk_score;
+                    const details = data.details;
+                    const recommendations = data.recommendations;
+                    const predictedType = data.predicted_type;
+
+                    resultDiv.innerHTML = `
+                        <div class="alert alert-${data.is_malicious ? 'danger' : 'success'}">
+                            <h4 class="alert-heading">${isMalicious}</h4>
+                            <p>Risk Score: ${riskScore}%</p>
+                            <p>Type: ${predictedType}</p>
+                            <hr>
+                            <h5>Details:</h5>
+                            <ul>
+                                <li>Length: ${details.length}</li>
+                                <li>Has IP: ${details.has_ip ? 'Yes' : 'No'}</li>
+                                <li>Has Suspicious Characters: ${details.has_suspicious_chars ? 'Yes' : 'No'}</li>
+                                <li>Domain Age (days): ${details.domain_age_days}</li>
+                                <li>Has HTTPS: ${details.has_https ? 'Yes' : 'No'}</li>
+                                <li>Number of Redirections: ${details.num_redirections}</li>
+                                <li>Is Blacklisted: ${details.is_blacklisted ? 'Yes' : 'No'}</li>
+                                <li>Phishing Keywords: ${details.phishing_keywords}</li>
+                            </ul>
+                            <hr>
+                            <h5>Recommendations:</h5>
+                            <ul>
+                                ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<p class="text-danger">Error analyzing URL: ${data.message}</p>`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p class="text-danger">Error: ${error.message}</p>`;
+            }
+        });
+
+        // Check auth status on page load
+        checkAuth();
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', function() {
+            const navbar = document.querySelector('.navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('navbar-scrolled');
+            } else {
+                navbar.classList.remove('navbar-scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
